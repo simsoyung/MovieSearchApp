@@ -56,8 +56,9 @@ class ViewController: UIViewController {
     }
     func configureUI(){
         view.backgroundColor = .white
-        collectionView.backgroundColor = .blue
-        searchBar.backgroundColor = .brown
+        collectionView.backgroundColor = .black
+        searchBar.backgroundColor = .gray
+        collectionView.contentMode = .scaleAspectFill
     }
     func callRequest(query: String){
         let url = "\(APIURL.apiURL)\(query)&include_adult=false&language=en-US&page=1"
@@ -67,18 +68,16 @@ class ViewController: UIViewController {
             case .success(let value):
                 self.movieList = value
                 self.collectionView.reloadData()
-            case .failure(let error):
-                print(error)
+            case .failure(_):
+                    let alert = UIAlertController(
+                        title: "'ㅈ\(self.searchBar.text ?? "")'라는",
+                        message: "검색 결과가 없습니다.",
+                        preferredStyle: .alert)
+                    let cancel = UIAlertAction(title: "확인", style: .cancel)
+                    alert.addAction(cancel)
+                    self.present(alert, animated: true)
             }
         }
-//        AF.request(url, headers: header).responseString { response in
-//            switch response.result {
-//            case .success(let value):
-//                print(value)
-//            case .failure(let error):
-//                print(error)
-//            }
-//        }
     }
 }
 
@@ -92,13 +91,16 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.id, for: indexPath) as! CollectionViewCell
         let data = movieList.results[indexPath.item]
         cell.configureMainCell(data: data)
+        cell.layer.cornerRadius = 20
+        cell.clipsToBounds = true
         return cell
     }    
 }
 
 extension ViewController: UISearchBarDelegate {
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        callRequest(query: searchBar.text!)
+            callRequest(query: searchBar.text!)
     }
 }
 
